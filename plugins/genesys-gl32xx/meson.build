@@ -7,7 +7,7 @@ plugin_quirks += files('genesys-gl32xx.quirk')
 plugin_builtins += static_library('fu_plugin_genesys_gl32xx',
   sources: [
     'fu-genesys-gl32xx-device.c',
-    'fu-genesys-gl32xx-firmware.c',
+    'fu-genesys-gl32xx-firmware.c', # fuzzing
     'fu-genesys-gl32xx-plugin.c',
   ],
   include_directories: plugin_incdirs,
