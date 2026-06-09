@@ -509,6 +509,7 @@ def _build(bld: Builder) -> None:
         Fuzzer("redfish-smbios", srcdir="redfish", pattern="redfish-smbios"),
         Fuzzer("synaptics-prometheus"),
         Fuzzer("synaptics-cape", pattern="synaptics-cape-hid-firmware"),
+        Fuzzer("synaptics-cxaudio"),
         Fuzzer("synaptics-mst"),
         Fuzzer("synaptics-rmi"),
         Fuzzer("uf2"),
