@@ -1,0 +1,42 @@
+#include "config.h"
+
+#include "fu-firmware.h"
+#include "fu-memory-input-stream.h"
+
+#include "@INCLUDE@"
+
+int
+LLVMFuzzerInitialize(int *argc, char ***argv)
+{
+	g_type_ensure(@GTYPE@);
+	(void)g_setenv("G_DEBUG", "fatal-criticals", TRUE);
+	(void)g_setenv("FWUPD_FUZZER_RUNNING", "1", TRUE);
+	return 0;
+}
+
+int
+LLVMFuzzerTestOneInput(const guint8 *data, gsize size)
+{
+	FuFirmwareParseFlags flags =
+	    FU_FIRMWARE_PARSE_FLAG_NO_SEARCH | FU_FIRMWARE_PARSE_FLAG_CACHE_BLOB |
+	    FU_FIRMWARE_PARSE_FLAG_IGNORE_VID_PID | FU_FIRMWARE_PARSE_FLAG_IGNORE_CHECKSUM;
+	g_autoptr(FuFirmware) firmware = g_object_new(@GTYPE@, NULL);
+	g_autoptr(FuInputStream) stream = NULL;
+	g_autoptr(GByteArray) buf_out = NULL;
+
+	stream = fu_memory_input_stream_new_from_data(data, size, NULL);
+	if (!fu_firmware_parse_stream(firmware, stream, 0x0, flags, NULL))
+		return 0;
+	if (size <= 64 * 1024) {
+		g_autofree gchar *xml =
+		    fu_firmware_export_to_xml(firmware,
+					      FU_FIRMWARE_EXPORT_FLAG_INCLUDE_DEBUG |
+						  FU_FIRMWARE_EXPORT_FLAG_SORTED |
+						  FU_FIRMWARE_EXPORT_FLAG_ASCII_DATA,
+					      NULL);
+	}
+	buf_out = fu_firmware_write_array(firmware, NULL);
+	if (buf_out == NULL)
+		return 0;
+	return 0;
+}

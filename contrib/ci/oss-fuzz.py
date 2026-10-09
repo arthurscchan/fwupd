@@ -338,11 +338,12 @@ class Builder:
 
 
 class Fuzzer:
-    def __init__(self, name, srcdir=None, pattern=None) -> None:
+    def __init__(self, name, srcdir=None, pattern=None, export_parsed=False) -> None:
         self.name = name
         self.srcdir = srcdir or name
         self.globstr = f"{name}*.bin"
         self.pattern = pattern or f"{name}-firmware"
+        self.export_parsed = export_parsed
 
     @property
     def name_camel(self) -> str:
@@ -485,13 +486,13 @@ def _build(bld: Builder) -> None:
     # built in formats
     for fzr in [
         Fuzzer("csv"),
-        Fuzzer("cab"),
-        Fuzzer("coswid"),
-        Fuzzer("dfuse"),
+        Fuzzer("cab", export_parsed=True),
+        Fuzzer("coswid", export_parsed=True),
+        Fuzzer("dfuse", export_parsed=True),
         Fuzzer("edid", pattern="edid"),
         Fuzzer("elf"),
         Fuzzer("fdt"),
-        Fuzzer("fit"),
+        Fuzzer("fit", export_parsed=True),
         Fuzzer("fmap"),
         Fuzzer("hid-descriptor", pattern="hid-descriptor"),
         Fuzzer("ihex"),
@@ -500,7 +501,7 @@ def _build(bld: Builder) -> None:
         Fuzzer("intel-thunderbolt"),
         Fuzzer("ifwi-cpd"),
         Fuzzer("ifwi-fpt"),
-        Fuzzer("json"),
+        Fuzzer("json", export_parsed=True),
         Fuzzer("oprom"),
         Fuzzer("protobuf", pattern="protobuf"),
         Fuzzer("uswid"),
@@ -515,7 +516,11 @@ def _build(bld: Builder) -> None:
         Fuzzer("zip"),
     ]:
         src = bld.substitute(
-            "fwupd/libfwupdplugin/fu-fuzzer-firmware.c.in",
+            (
+                "fwupd/libfwupdplugin/fu-fuzzer-firmware-export.c.in"
+                if fzr.export_parsed
+                else "fwupd/libfwupdplugin/fu-fuzzer-firmware.c.in"
+            ),
             {
                 "@GTYPE@": fzr.gtype,
                 "@INCLUDE@": os.path.join("libfwupdplugin", fzr.header),
